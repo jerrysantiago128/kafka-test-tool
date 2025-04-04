@@ -1,0 +1,23 @@
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "age": 30,
+  "isStudent": false,
+  "address": {
+    "street": "123 Main St",
+    "city": "Anytown",
+    "state": "CA",
+    "zipCode": "91234"
+  },
+  "phoneNumbers": [
+    {
+      "type": "home",
+      "number": "555-123-4567"
+    },
+    {
+      "type": "mobile",
+      "number": "555-987-6543"
+    }
+  ]
+}
+
