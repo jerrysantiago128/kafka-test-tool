@@ -147,12 +147,12 @@ public class Producer {
         if(filePath.toLowerCase().endsWith(".json")){
             // READ THE JSON FILE
             try{
-                 contentString =  new String(Files.readAllBytes(Paths.get(filePath)));
-
-                if((!contentString.trim().startsWith("{") || !contentString.trim().endsWith("}")) || (!contentString.trim().startsWith("[") || !contentString.trim().endsWith("]"))){
-                    logger.error("File {} does not appear to be a valid JSON object. \n" +
-                        "It may be an array or invalid.", filePath);
-                    // return;
+                if((!contentString.trim().startsWith("{") || !contentString.trim().endsWith("}")) && (!contentString.trim().startsWith("[") || !contentString.trim().endsWith("]"))){
+                    logger.error("File {} does not appear to be a valid JSON object or array. \n" +
+                        "It may be invalid or null.", filePath);
+                }
+                else {
+                    contentString =  new String(Files.readAllBytes(Paths.get(filePath)));
                 }
             } catch (Exception e){
                 logger.error("Unable to read JSON file into message.");
@@ -161,11 +161,12 @@ public class Producer {
         else if (filePath.toLowerCase().endsWith(".xml")){
             // READ THE XML FILE
             try{
-                contentString = new String(Files.readAllBytes(Paths.get(filePath)));
-
                 if(!contentString.trim().startsWith("<") || !contentString.trim().endsWith(">")){
                     logger.error("File {} does not appear to be a valid XML document.", filePath);
                     // return;
+                }
+                else {
+                    contentString = new String(Files.readAllBytes(Paths.get(filePath)));
                 }
             } catch (Exception e){
                 logger.error("Unable to read XML file into message.");
