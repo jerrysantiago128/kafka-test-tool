@@ -45,8 +45,7 @@ public class Producer {
         // initialize application variables with system arguments 
         final String BOOTSTRAP_SERVERS = args[0];
     	final String TOPIC_NAME = args[1];
-        final String GROUP_ID = args[2];
-        boolean shouldReadFile= args[3].equals("-f") || args[3].equals("--file");
+        boolean shouldReadFile= args[2].equals("-f") || args[2].equals("--file");
 
         //initialize messages ArrayList
         ArrayList<String> messages = new ArrayList<>();
@@ -55,9 +54,9 @@ public class Producer {
     // add each command line argument to messages ArrayList
     
 
-        if (shouldReadFile && args.length == 5){
+        if (shouldReadFile && args.length == 4){
 
-            String filePath = args[4];
+            String filePath = args[3];
             
             if(validateFilePath(filePath)){
                 messages.add(readFile(filePath));
@@ -68,13 +67,13 @@ public class Producer {
             logger.error("Flag {} specified but no file path given.", args[3]);
         }
         else {
-            for (int i = 3; i < args.length; i++ ){
+            for (int i = 2; i < args.length; i++ ){
                 messages.add(args[i]);
             }
         }
 
         // create a single producer rather than one for each message
-        KafkaProducer producer = construct_producer(BOOTSTRAP_SERVERS, GROUP_ID);
+        KafkaProducer producer = construct_producer(BOOTSTRAP_SERVERS);
 
         // while messages in ArrayList exist create a producer and send a message
         for( String message : messages){
@@ -85,12 +84,11 @@ public class Producer {
         cleanup();
     }
 
-    private static KafkaProducer construct_producer(BOOTSTRAP_SERVERS, GROUP_ID){
+    private static KafkaProducer construct_producer(String BOOTSTRAP_SERVERS){
 
         // Create Producer Properties
         Properties properties = new Properties();
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
-        properties.setProperty(ProducerConfig.GROUP_ID_CONFIG, GROUP_ID);
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         // Create the Producer
