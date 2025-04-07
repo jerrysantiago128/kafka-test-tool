@@ -20,11 +20,29 @@ public class Consumer {
     
     public static void main(String[] args) {
 
-	final String BOOTSTRAP_SERVERS = args[0];
-	final String TOPIC_NAME = args[1];
-	final String GROUP_ID = args[2];
+
+        //validate test case 1 
+        // check for proper system argument list
+        if (args.length < 3) {
+            logger.error("You have only provided {} of the 3 minimum arguments.\n\n\n"+ 
+                "Usage: Producer <bootstrap-servers> <topic-name> <group-id> \n" +
+                "Where <bootstrap-servers> is a individual string or path to a file.\n" +
+                "Where <topic-name> is a individual string or path to a file.\n" +
+                "Where <group-id> is a individual string or path to a file.\n", args.length);
+                //System.exit(1);
+        }
         
-	// Create Consumer Properties
+        final String BOOTSTRAP_SERVERS = args[0];
+        final String TOPIC_NAME = args[1];
+        final String GROUP_ID = args[2];
+
+        consume(BOOTSTRAP_SERVERS, TOPIC_NAME, GROUP_ID);
+
+    }
+
+    private static void consume(String BOOTSTRAP_SERVERS, String TOPIC_NAME, String GROUP_ID){
+
+        // Create Consumer based on Properties
         Properties properties = new Properties();
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
@@ -35,10 +53,10 @@ public class Consumer {
         // Create the Consumer
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
 
-        // Subscribe to a topic
+        // Subscribe to the topic
         consumer.subscribe(Collections.singleton(TOPIC_NAME));
 
-        // Poll for new data
+        //start consumer and poll for new data
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
 
