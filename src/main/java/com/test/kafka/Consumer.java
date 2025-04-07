@@ -62,7 +62,7 @@ public class Consumer {
 
             for (ConsumerRecord<String, String> record : records) {
                 logger.info("Message Recieved: \n" +
-                    "Key: {} \n,Topic: {} \n, Value: {} \n,Offset: {} \n,Partition: {}",
+                    "Key: {} \nTopic: {} \nValue: {} \nOffset: {} \nPartition: {}\n ",
                     record.key(), record.topic(), record.value(), record.offset(), record.partition());
             }
         }
