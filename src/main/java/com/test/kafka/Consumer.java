@@ -61,8 +61,9 @@ public class Consumer {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
 
             for (ConsumerRecord<String, String> record : records) {
-                logger.info("Key: " + record.key() + ", Value: " + record.value());
-                logger.info("Partition: " + record.partition() + ", Offset: " + record.offset());
+                logger.info("Message Recieved: \n" +
+                    "Key: {} \n,Topic: {} \n, Value: {} \n,Offset: {} \n,Partition: {}",
+                    record.key(), record.topic(), record.value(), record.offset(), record.partition());
             }
         }
     }
