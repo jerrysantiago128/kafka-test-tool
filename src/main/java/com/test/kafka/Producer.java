@@ -36,7 +36,6 @@ public class Producer {
                 "Usage: Producer <bootstrap-servers> <topic-name> [FLAG] <message or file path> \n" +
                 "Where <bootstrap-servers> is a individual string or path to a file.\n" +
                 "Where <topic-name> is a individual string or path to a file.\n" +
-                "Where <group-id> is the group-id assigned to the producer.\n" +
                 "Where [FLAG] is [-f] or [--file].\n" +
                 "Where <message> is a individual string or path to a file.\n", args.length);
                 //System.exit(1);
@@ -97,14 +96,14 @@ public class Producer {
         return producer;
     }
 
-    private static void produce(KafkaProducer producer, String TOPIC_NAME, String messages){ // may cause issue for messages parameter type string not arraylist
+    private static void produce(KafkaProducer producer, String TOPIC_NAME, String messages){ 
 
-        ProducerRecord<String, String> record = new ProducerRecord<>(TOPIC_NAME, "message:" + messages); //add the 'objectKey' string???
+        ProducerRecord<String, String> record = new ProducerRecord<>(TOPIC_NAME, messages); //add the 'objectKey' string???
 
         // Send data - asynchronous
         producer.send(record, (metadata, exception) -> {
             if (exception == null) {
-                logger.info("Received meta \n" +
+                logger.info("Message Sent on: \n" +
                         "Topic: " + metadata.topic() + "\n" +
                         "Partition: " + metadata.partition() + "\n" +
                         "Offset: " + metadata.offset() + "\n" +
