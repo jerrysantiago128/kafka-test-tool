@@ -36,7 +36,7 @@ public class Producer {
                 "Usage: Producer <bootstrap-servers> <topic-name> [FLAG] <message or file path> \n" +
                 "Where <bootstrap-servers> is a individual string or path to a file.\n" +
                 "Where <topic-name> is a individual string or path to a file.\n" +
-                "Where [FLAG] is -s or -f depending one if you need to implement security send a file as a message .\n" +
+                "Where [FLAG] is [-f] or [--file].\n" +
                 "Where <message> is a individual string or path to a file.\n", args.length);
                 //System.exit(1);
         }
@@ -137,7 +137,8 @@ public class Producer {
         // String validPath = filePath;
         return true;
     }
-    // may need to return a STRING to pass
+
+    // read the contents of the file provided, and return the contents as a String
     private static String readFile(String filePath){
         // check the file type
 
@@ -147,7 +148,7 @@ public class Producer {
             try{
                  contentString =  new String(Files.readAllBytes(Paths.get(filePath)));
 
-                if(!contentString.trim().startsWith("{") || !contentString.trim().endsWith("}")){
+                if((!contentString.trim().startsWith("{") || !contentString.trim().endsWith("}")) || (!contentString.trim().startsWith("[") || !contentString.trim().endsWith("]"))){
                     logger.error("File {} does not appear to be a valid JSON object. \n" +
                         "It may be an array or invalid.", filePath);
                     // return;
