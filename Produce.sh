@@ -3,4 +3,4 @@
 dir=$(pwd)
 jar=$(find "$dir" -type f -name "*.jar")
 
-java -cp $dir/target/kafka-test-1.0-SNAPSHOT.jar com.test.kafka.Producer "$@"
+java -cp $dir/target/kafka-test-tool-0.10.0.jar com.test.kafka.Producer "$@"
