@@ -36,6 +36,7 @@ public class Producer {
                 "Usage: Producer <bootstrap-servers> <topic-name> [FLAG] <message or file path> \n" +
                 "Where <bootstrap-servers> is a individual string or path to a file.\n" +
                 "Where <topic-name> is a individual string or path to a file.\n" +
+                "Where <group-id> is the group-id assigned to the producer.\n" +
                 "Where [FLAG] is [-f] or [--file].\n" +
                 "Where <message> is a individual string or path to a file.\n", args.length);
                 //System.exit(1);
@@ -44,7 +45,8 @@ public class Producer {
         // initialize application variables with system arguments 
         final String BOOTSTRAP_SERVERS = args[0];
     	final String TOPIC_NAME = args[1];
-        boolean shouldReadFile= args[2].equals("-f") || args[2].equals("--file");
+        final String GROUP_ID = args[2];
+        boolean shouldReadFile= args[3].equals("-f") || args[3].equals("--file");
 
         //initialize messages ArrayList
         ArrayList<String> messages = new ArrayList<>();
@@ -53,9 +55,9 @@ public class Producer {
     // add each command line argument to messages ArrayList
     
 
-        if (shouldReadFile && args.length == 4){
+        if (shouldReadFile && args.length == 5){
 
-            String filePath = args[3];
+            String filePath = args[4];
             
             if(validateFilePath(filePath)){
                 messages.add(readFile(filePath));
@@ -63,37 +65,42 @@ public class Producer {
         }
         else if (shouldReadFile && args.length < 4){
             
-            logger.error("Flag {} specified but no file path given.", args[2]);
+            logger.error("Flag {} specified but no file path given.", args[3]);
         }
         else {
-            for (int i = 2; i < args.length; i++ ){
+            for (int i = 3; i < args.length; i++ ){
                 messages.add(args[i]);
             }
         }
 
+        // create a single producer rather than one for each message
+        KafkaProducer producer = construct_producer(BOOTSTRAP_SERVERS, GROUP_ID);
 
-        // while meesages in ArrayList exist create a producer and send a message
+        // while messages in ArrayList exist create a producer and send a message
         for( String message : messages){
-            
             // create a producer and send a messages of messages[i] over the topic
-            produce(BOOTSTRAP_SERVERS, TOPIC_NAME, message);
-
-            cleanup();
-
+            produce(producer, TOPIC_NAME, message);
         }
+        // clean up producer after sending messages
+        cleanup();
     }
 
-    private static void produce(String BOOTSTRAP_SERVERS, String TOPIC_NAME, String messages){ // may cause issue for messages parameter type string not arraylist
+    private static KafkaProducer construct_producer(BOOTSTRAP_SERVERS, GROUP_ID){
 
-        
-        // create the properties for the Producer
         // Create Producer Properties
         Properties properties = new Properties();
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+        properties.setProperty(ProducerConfig.GROUP_ID_CONFIG, GROUP_ID);
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         // Create the Producer
         producer = new KafkaProducer<>(properties);
+
+        return producer;
+    }
+
+    private static void produce(KafkaProducer producer, String TOPIC_NAME, String messages){ // may cause issue for messages parameter type string not arraylist
+
         ProducerRecord<String, String> record = new ProducerRecord<>(TOPIC_NAME, "message:" + messages); //add the 'objectKey' string???
 
         // Send data - asynchronous
