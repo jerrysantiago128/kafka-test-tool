@@ -103,7 +103,8 @@ public class Producer {
                         "Topic: " + metadata.topic() + "\n" +
                         "Partition: " + metadata.partition() + "\n" +
                         "Offset: " + metadata.offset() + "\n" +
-                        "Timestamp: " + metadata.timestamp());
+                        "Timestamp: " + metadata.timestamp() + "\n");
+                logger.info("Message successfully sent! \n");
             } else {
                 logger.error("Error while producing", exception);
             }
@@ -144,15 +145,18 @@ public class Producer {
         // check the file type
 
         String contentString = "";
+        String message = "";
         if(filePath.toLowerCase().endsWith(".json")){
             // READ THE JSON FILE
             try{
-                if((!contentString.trim().startsWith("{") || !contentString.trim().endsWith("}")) && (!contentString.trim().startsWith("[") || !contentString.trim().endsWith("]"))){
-                    logger.error("File {} does not appear to be a valid JSON object or array. \n" +
-                        "It may be invalid or null.", filePath);
+                contentString =  new String(Files.readAllBytes(Paths.get(filePath)));
+                if((contentString.trim().startsWith("{") && contentString.trim().endsWith("}")) || (contentString.trim().startsWith("[") && contentString.trim().endsWith("]"))){
+                    message = contentString;   
                 }
                 else {
-                    contentString =  new String(Files.readAllBytes(Paths.get(filePath)));
+                    logger.error("File {} does not appear to be a valid JSON object or array. \n" +
+                        "It may be invalid or null.", filePath);
+                    System.exit(1);
                 }
             } catch (Exception e){
                 logger.error("Unable to read JSON file into message.");
@@ -161,18 +165,21 @@ public class Producer {
         else if (filePath.toLowerCase().endsWith(".xml")){
             // READ THE XML FILE
             try{
-                if(!contentString.trim().startsWith("<") || !contentString.trim().endsWith(">")){
-                    logger.error("File {} does not appear to be a valid XML document.", filePath);
+                contentString = new String(Files.readAllBytes(Paths.get(filePath)));
+
+                if(contentString.trim().startsWith("<") && contentString.trim().endsWith(">")){
+                    message = contentString;
                     // return;
                 }
                 else {
-                    contentString = new String(Files.readAllBytes(Paths.get(filePath)));
+                    logger.error("File {} does not appear to be a valid XML document.", filePath);
+                    System.exit(1);
                 }
             } catch (Exception e){
                 logger.error("Unable to read XML file into message.");
             }
         }
-        return contentString;
+        return message;
     }
 
     private static void cleanup(){
