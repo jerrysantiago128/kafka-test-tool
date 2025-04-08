@@ -63,7 +63,7 @@ public class Producer {
         }
         else if (shouldReadFile && args.length < 4){
             
-            logger.error("Flag {} specified but no file path given.", args[3]);
+            logger.error("Flag {} specified but no file path given.", args[2]);
         }
         else {
             for (int i = 2; i < args.length; i++ ){
