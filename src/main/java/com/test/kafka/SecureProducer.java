@@ -25,9 +25,6 @@ public class Producer {
 
     private static final Logger logger = LoggerFactory.getLogger(Producer.class.getSimpleName());
     
-    private int NumOfBasicConfigProps = 2;
-    private int NumOfSecurityConfigProps = 2;
-    private int NumOfFileMessageProps = 2;
     private static KafkaProducer<String, String> producer;
     
     public static void main(String[] args) {
@@ -49,47 +46,115 @@ public class Producer {
         final String BOOTSTRAP_SERVERS = args[0];
     	final String TOPIC_NAME = args[1];
         // check for security flag
-        boolean shouldSecure =(args[2].equals("-s") || args[2].equals("--security")) && (!args[4].equals("-f") || !args[4].equals("--file")); // overengineered??
+        boolean shouldSecure = (args[2].equals("-s") || args[2].equals("--security")) && (!args[4].equals("-f") || !args[4].equals("--file")); // overengineered??
+        boolean shouldSecureSSL = (args[2].equals("-s") || args[2].equals("--security")) && (!args[6].equals("-f") || !args[6].equals("--file")); // overengineered??
         boolean shouldReadFile = (args[2].equals("-f") || args[2].equals("--file"));
         boolean shouldSecureAndReadFile = (args[2].equals("-s") || args[2].equals("--security")) && (args[4].equals("-f") || args[4].equals("--file"));
+        boolean shouldSecureSSLAndReadFile = (args[2].equals("-s") || args[2].equals("--security")) && (args[6].equals("-f") || args[6].equals("--file"));
         final String SECURITY_STRING;
 
         //initialize messages ArrayList
         ArrayList<String> messages = new ArrayList<>();
 
-        if (shouldSecureAndReadFile){
-            if(validateSecurity(args[3])){
+        if(shouldSecureSSLAndReadFile){
+
+            // validate security content
+            if(validateSecurity(args[3], args[4], args[5])){
                 // some logic for security; maybe return the security string
                 SECURITY_STRING = args[3];
-                // additional logic for truststore??
+                String truststore = args[4];
+                String truststorePassword = args[5];
             }
             else {
-                // security string invalid
+                // security string invalid, or ssl content invalid
+                logger.error("There seems to be an issue with your security content, please make sure it is valid");
             }
-            String filePath = args[5];
+            //validate file path
+            String filePath = args[7];
             if(validateFilePath(filePath)){
                 // some logic for the file path
+                messages.add(readFile(filePath));
             }
             else {
                 // file path not valid
+                logger.error("Unable to validate file path provided", filePath);
+                System.exit(1);
             }
         }
-        else if (shouldSecure && args.length == 4){
-            //String security = args[3];
+        if(shouldSecureAndReadFile){
+            // validate security content
             if(validateSecurity(args[3])){
-                // some logic for security; proabably just set the security string to pass to the properties function
+                // some logic for security; maybe return the security string
                 SECURITY_STRING = args[3];
-                // additional logic for truststore??
+            }
+            else {
+                // security string invalid, or ssl content invalid
+                logger.error("Security string {} is not a valid string\n" +
+                    "Valid strings are PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL", args[3]);
+            }
+            //validate file path
+            String filePath = args[5];
+            if(validateFilePath(filePath)){
+                // some logic for the file path
+                messages.add(readFile(filePath));
+            }
+            else {
+                // file path not valid
+                logger.error("Unable to validate file path provided", filePath);
+                System.exit(1);
+            }
+        }
+
+        if(shouldSecureSSL && args.length > 6){
+
+            // validate security content
+            if(validateSecurity(args[3], args[4], args[5])){
+                // some logic for security; maybe return the security string
+                SECURITY_STRING = args[3];
+                String truststore = args[4];
+                String truststorePassword = args[5];
+            }
+            else {
+                // security string invalid, or ssl content invalid
+                logger.error("There seems to be an issue with your security content, please make sure it is valid");
+            }
+
+            for (int i = 6; i < args.length; i++ ){
+                messages.add(args[i]);
+            }
+        }
+        else if(shouldSecureSSL && args.length < 6){
+            logger.error("Flag {} specified but only {} of minimum 4 arguments given.", args[2], (args.length - 3));
+        }
+        else if(shouldSecureSSL && args.length ==  6){
+            logger.error("No argument for message(s) recieved. Did you send a message via command line?");
+        }
+
+        if(shouldSecure && args.length > 4){
+            if(validateSecurity(args[3])){
+                SECURITY_STRING = args[3];
             }
             else{
-                logger.error("Security string {} is not a valid string", args[3])
+                logger.error("Security string {} is not a valid string\n" +
+                    "Valid strings are PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL", args[3]);
             }
+
+            for (int i = 4; i < args.length; i++ ){
+                messages.add(args[i]);
+            }
+            
         }
+        else if (shouldSecure && args.length == 4){
+                // security string invalid
+                logger.error("No argument for message(s) recieved. Did you send a message via command line?");
+                System.exit(1);
+            }
         else if (shouldSecure && args.length < 4){
                 // security string invalid
-                logger.error("Flag {} specified but no security string given.", args[2]);
+                logger.error("Flag {} specified but only {} of minimum 2 arguments given.", args[2], (args.length - 2));
             }
-        else if (shouldReadFile && args.length == 4){
+
+        if (shouldReadFile && args.length == 4){
             String filePath = args[3];
             if(validateFilePath(filePath)){
                 messages.add(readFile(filePath));
@@ -101,11 +166,14 @@ public class Producer {
         else if (shouldReadFile && args.length < 4){
             logger.error("Flag {} specified but no file path given.", args[2]);
         }
-        else { // no security or file
+        
+        // no security or file
+        if (!shouldReadFile || !shouldSecure || !shouldSecureSSLAndReadFile || !shouldSecureSSL || !shouldSecureAndReadFile) { 
             for (int i = 2; i < args.length; i++ ){
                 messages.add(args[i]);
             }
         }
+
 
         // create a produce depending on the security configuration
         if(SECURITY_STRING == null){
