@@ -1,4 +1,4 @@
-package com.test.kafka;
+package msps.test.kafka;
 
 //imports
 import org.apache.kafka.clients.consumer.ConsumerConfig;
