@@ -1,9 +1,11 @@
 FROM registry1.dso.mil/ironbank/google/distroless/java-11:nonroot
 
-COPY target/kafka-test-tool* /app/kafka-test-tool.jar
+ARG BOOTSTRAP_SERVER=k8s-test
+ARG TOPIC_NAME=k8s
+ARG GROUP_ID=k8s-consumer
 
-
+COPY target/kafka-test-tool-0.10.0.jar /app/kafka-test-tool-0.10.0.jar
 
 WORKDIR /app
 
-CMD ['java -cp kafka-test-tool.jar msps.kafka.test.Consumer']
+CMD ["java",  "-cp kafka-test-tool-0.10.0.jar", "${BOOTSTRAP_SERVER}", "${TOPIC_NAME}", "${GROUP_ID}", "msps.kafka.test.Consumer"]
