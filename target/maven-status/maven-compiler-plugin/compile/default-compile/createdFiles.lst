@@ -1,0 +1,4 @@
+com/test/kafka/Producer.class
+com/test/kafka/Consumer.class
+com/test/kafka/ByteArrayProducer.class
+com/test/kafka/SecureProducer.class
