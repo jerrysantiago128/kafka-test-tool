@@ -1,0 +1,9 @@
+FROM registry1.dso.mil/ironbank/google/distroless/java-11:nonroot
+
+COPY target/kafka-test-tool* /app/kafka-test-tool.jar
+
+
+
+WORKDIR /app
+
+CMD ['java -cp kafka-test-tool.jar msps.kafka.test.Producer']

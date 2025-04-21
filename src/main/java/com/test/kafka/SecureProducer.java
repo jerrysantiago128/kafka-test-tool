@@ -21,7 +21,7 @@ import java.io.File;
 
 
 //defining the class
-public class Producer {
+public class SecureProducer {
 
     private static final Logger logger = LoggerFactory.getLogger(Producer.class.getSimpleName());
     
@@ -51,7 +51,7 @@ public class Producer {
         boolean shouldReadFile = (args[2].equals("-f") || args[2].equals("--file"));
         boolean shouldSecureAndReadFile = (args[2].equals("-s") || args[2].equals("--security")) && (args[4].equals("-f") || args[4].equals("--file"));
         boolean shouldSecureSSLAndReadFile = (args[2].equals("-s") || args[2].equals("--security")) && (args[6].equals("-f") || args[6].equals("--file"));
-        final String SECURITY_STRING;
+        String SECURITY_STRING = "";
 
         //initialize messages ArrayList
         ArrayList<String> messages = new ArrayList<>();
@@ -81,7 +81,7 @@ public class Producer {
                 System.exit(1);
             }
         }
-        if(shouldSecureAndReadFile){
+        else if(shouldSecureAndReadFile){
             // validate security content
             if(validateSecurity(args[3])){
                 // some logic for security; maybe return the security string
@@ -105,7 +105,7 @@ public class Producer {
             }
         }
 
-        if(shouldSecureSSL && args.length > 6){
+        else if(shouldSecureSSL && args.length > 6){
 
             // validate security content
             if(validateSecurity(args[3], args[4], args[5])){
@@ -130,7 +130,7 @@ public class Producer {
             logger.error("No argument for message(s) recieved. Did you send a message via command line?");
         }
 
-        if(shouldSecure && args.length > 4){
+        else if(shouldSecure && args.length > 4){
             if(validateSecurity(args[3])){
                 SECURITY_STRING = args[3];
             }
@@ -154,7 +154,7 @@ public class Producer {
                 logger.error("Flag {} specified but only {} of minimum 2 arguments given.", args[2], (args.length - 2));
             }
 
-        if (shouldReadFile && args.length == 4){
+        else if (shouldReadFile && args.length == 4){
             String filePath = args[3];
             if(validateFilePath(filePath)){
                 messages.add(readFile(filePath));
@@ -168,7 +168,7 @@ public class Producer {
         }
         
         // no security or file
-        if (!shouldReadFile || !shouldSecure || !shouldSecureSSLAndReadFile || !shouldSecureSSL || !shouldSecureAndReadFile) { 
+        else if (!shouldReadFile || !shouldSecure || !shouldSecureSSLAndReadFile || !shouldSecureSSL || !shouldSecureAndReadFile) { 
             for (int i = 2; i < args.length; i++ ){
                 messages.add(args[i]);
             }
@@ -220,21 +220,21 @@ public class Producer {
             logger.info("Setting Security string  to {}", SECURITY_STRING);
         }
         else if(SECURITY_STRING == "SSL"){
-            producerProps.setProperty("security.protocol", SECURITY_STRING);
-            producerProps.setProperty("ssl.truststore.location", "/path/to/kafka.truststore.jks"); // Replace
-            producerProps.setProperty("ssl.truststore.password", "your-truststore-password"); // Replace
+            properties.setProperty("security.protocol", SECURITY_STRING);
+            properties.setProperty("ssl.truststore.location", "/path/to/kafka.truststore.jks"); // Replace
+            properties.setProperty("ssl.truststore.password", "your-truststore-password"); // Replace
         }
         else if(SECURITY_STRING == "SASL_PLAINTEXT"){
-            producerProps.setProperty("security.protocol", SECURITY_STRING);
-            producerProps.setProperty("sasl.mechanism", "PLAIN"); // Or SCRAM-SHA-256, SCRAM-SHA-512, GSSAPI
-            producerProps.setProperty("sasl.jaas.config", "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"your-username\" password=\"your-password\";"); // Replace
+            properties.setProperty("security.protocol", SECURITY_STRING);
+            properties.setProperty("sasl.mechanism", "PLAIN"); // Or SCRAM-SHA-256, SCRAM-SHA-512, GSSAPI
+            properties.setProperty("sasl.jaas.config", "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"your-username\" password=\"your-password\";"); // Replace
         }
         else if(SECURITY_STRING == "SASL_SSL"){
-            producerProps.setProperty("security.protocol", SECURITY_STRING);
-            producerProps.setProperty("sasl.mechanism", "PLAIN"); // Or SCRAM-SHA-256, SCRAM-SHA-512, GSSAPI
-            producerProps.setProperty("sasl.jaas.config", "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"your-username\" password=\"your-password\";"); // Replace
-            producerProps.setProperty("ssl.truststore.location", "/path/to/kafka.truststore.jks"); // Replace
-            producerProps.setProperty("ssl.truststore.password", "your-truststore-password"); // Replace
+            properties.setProperty("security.protocol", SECURITY_STRING);
+            properties.setProperty("sasl.mechanism", "PLAIN"); // Or SCRAM-SHA-256, SCRAM-SHA-512, GSSAPI
+            properties.setProperty("sasl.jaas.config", "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"your-username\" password=\"your-password\";"); // Replace
+            properties.setProperty("ssl.truststore.location", "/path/to/kafka.truststore.jks"); // Replace
+            properties.setProperty("ssl.truststore.password", "your-truststore-password"); // Replace
 
 
         }
@@ -265,6 +265,36 @@ public class Producer {
 
     //FIX THIS; change logic 
     private static boolean validateSecurity(String securityArg){
+        if(securityArg == null || securityArg.trim().isEmpty()){
+            logger.error("Security string {} is null or empty.", securityArg);
+            return false;
+        }
+
+        if(securityArg == "PLAINTEXT"){
+            logger.info("Setting Security string  to {}", securityArg);
+            return true;
+        }
+        else if(securityArg == "SSL"){
+            logger.info("Setting Security string  to {}", securityArg);
+            return true;
+        }
+        else if(securityArg == "SASL_PLAINTEXT"){
+            logger.info("Setting Security string  to {}", securityArg);
+            return true;
+        }
+        else if(securityArg == "SASL_SSL"){
+            logger.info("Setting Security string  to {}", securityArg);
+            return true;
+        }
+        else {
+            logger.error("Security string {} is not valid", securityArg);
+            // return bool
+            return false;
+        }
+
+    }
+    //FIX THIS; change logic 
+    private static boolean validateSecurity(String securityArg, String truststore, String truststorePassword){
         if(securityArg == null || securityArg.trim().isEmpty()){
             logger.error("Security string {} is null or empty.", securityArg);
             return false;
