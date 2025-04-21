@@ -6,4 +6,4 @@ COPY target/kafka-test-tool* /app/kafka-test-tool.jar
 
 WORKDIR /app
 
-CMD ['java -cp kafka-test-tool.jar msps.kafka.test.Producer']
+CMD ['java -cp kafka-test-tool.jar msps.kafka.test.Consumer']
