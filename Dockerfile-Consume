@@ -10,4 +10,4 @@ COPY target/kafka-test-tool-0.10.0.jar /app/
 
 WORKDIR /app
 
-CMD [ "kafka-test-tool-0.10.0.jar", "k8s-test:9092", "k8s", "k8s-consumer"]
+CMD [ "kafka-test-tool-0.10.0.jar", "consumer", "k8s-test:9092", "k8s", "k8s-consumer"]

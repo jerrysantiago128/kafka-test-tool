@@ -11,4 +11,4 @@ COPY test-files/jsonObject.json /app/message.json
 
 WORKDIR /app
 
-CMD ["kafka-test-tool-0.10.0.jar",  "k8s-test:9092", "k8s", "-f /app/message.json"]
+CMD ["kafka-test-tool-0.10.0.jar",  "producer", "k8s-test:9092", "k8s", "-f",  "/app/message.json"]
