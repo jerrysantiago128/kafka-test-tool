@@ -10,14 +10,14 @@ services:
     ports:
       - "2181:2181"
     networks:
-      kafka_network:
-        ipv4_address: 172.30.0.2
+      k8s_network:
+        ipv4_address: 172.40.0.2
         aliases: 
           - zookeeper
 
   kafka:
-    container_name: kafka-main
-    hostname: kafka-main
+    container_name: k8s-test
+    hostname: k8s-test
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
@@ -26,11 +26,11 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-main:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://k8s-test:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
-      kafka_network:
-        ipv4_address: 172.30.0.3
+      k8s_network:
+        ipv4_address: 172.40.0.3
         aliases:
           - kafka
 
@@ -41,20 +41,20 @@ services:
     depends_on:
       - kafka
     environment:
-      TOPIC_NAME: ${TOPIC_NAME:-default-topic}
-      BOOTSTRAP_SERVER: ${BOOTSTRAP_SERVER:-kafka-main:9092}
+      TOPIC_NAME: ${TOPIC_NAME:-k8s}
+      BOOTSTRAP_SERVER: ${BOOTSTRAP_SERVER:-k8s-test:9092}
     entrypoint: ["/bin/sh", "-c"]
-    command: ["sleep 10 && kafka-topics --create --topic $TOPIC_NAME --bootstrap-server $BOOTSTRAP_SERVER --partitions 3 --replication-factor 1"]
+    command: ["sleep 5 && kafka-topics --create --topic k8s --bootstrap-server k8s-test:9092 --partitions 3 --replication-factor 1"]
     networks:
-      kafka_network:
-        ipv4_address: 172.30.0.4
+      k8s_network:
+        ipv4_address: 172.40.0.4
 
 
 
 networks:
-  kafka_network:
+  k8s_network:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.30.0.0/16
+        - subnet: 172.40.0.0/16
 

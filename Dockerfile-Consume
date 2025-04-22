@@ -4,8 +4,10 @@ ARG BOOTSTRAP_SERVER=k8s-test
 ARG TOPIC_NAME=k8s
 ARG GROUP_ID=k8s-consumer
 
-COPY target/kafka-test-tool-0.10.0.jar /app/kafka-test-tool-0.10.0.jar
+EXPOSE 9092
+
+COPY target/kafka-test-tool-0.10.0.jar /app/
 
 WORKDIR /app
 
-CMD ["java",  "-cp kafka-test-tool-0.10.0.jar", "${BOOTSTRAP_SERVER}", "${TOPIC_NAME}", "${GROUP_ID}", "msps.kafka.test.Consumer"]
+CMD [ "kafka-test-tool-0.10.0.jar", "k8s-test:9092", "k8s", "k8s-consumer"]

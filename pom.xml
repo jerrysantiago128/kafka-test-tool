@@ -28,7 +28,7 @@
             <version>1.7.30</version>
         </dependency>
         <dependency>
-            <groupId>msps.fasterxml.jackson.core</groupId>
+            <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.13.0</version>
         </dependency>
@@ -59,17 +59,34 @@
                 <version>3.2.4</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>msps.test.kafka.Producer</mainClass> <!-- Replace with your actual main class --> 
-                                </transformer>
-                            </transformers>
-                        </configuration>
+                      <id>producer</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <finalName>kafka-producer</finalName>  <!-- Name the JAR -->
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <mainClass>msps.test.kafka.Producer</mainClass>
+                            </transformer>
+                        </transformers>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>consumer</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <finalName>kafka-consumer</finalName>  <!-- Name the JAR -->
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.MainClassTransformer">
+                                <mainClass>msps.test.kafka.Consumer</mainClass>
+                            </transformer>
+                        </transformers>
+                    </configuration>
                     </execution>
                 </executions>
             </plugin>

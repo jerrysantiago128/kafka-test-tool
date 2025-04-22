@@ -3,10 +3,12 @@ FROM registry1.dso.mil/ironbank/google/distroless/java-11:nonroot
 ARG BOOTSTRAP_SERVER=k8s-test
 ARG TOPIC_NAME=k8s
 
-COPY target/kafka-test-tool-0.10.0.jar /app/kafka-test-tool-0.10.0.jar
+EXPOSE 9092
+
+COPY target/kafka-test-tool-0.10.0.jar /app/
 
 COPY test-files/jsonObject.json /app/message.json
 
 WORKDIR /app
 
-CMD ["java",  "-cp kafka-test-tool.jar",  "msps.kafka.test.Producer", "${BOOTSTRAP_SERVER}", "${TOPIC_NAME}", "-f message.json"]
+CMD ["kafka-test-tool-0.10.0.jar",  "k8s-test:9092", "k8s", "-f /app/message.json"]
