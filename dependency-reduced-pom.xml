@@ -27,7 +27,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>msps.test.kafka.Producer</mainClass>
+                  <mainClass>msps.test.kafka.Main</mainClass>
                 </transformer>
               </transformers>
             </configuration>
