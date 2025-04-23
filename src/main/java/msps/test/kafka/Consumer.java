@@ -5,6 +5,9 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.DescribeClusterResult;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,13 +15,14 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 //defining that class
 public class Consumer {
 
     private static final Logger logger = LoggerFactory.getLogger(Consumer.class.getSimpleName());
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException, ExecutionException{
 
 
         //validate test case 1 
@@ -36,6 +40,7 @@ public class Consumer {
         final String TOPIC_NAME = args[1];
         final String GROUP_ID = args[2];
 
+        waitForKafkaBroker(BOOTSTRAP_SERVERS);
         consume(BOOTSTRAP_SERVERS, TOPIC_NAME, GROUP_ID);
 
     }
@@ -67,5 +72,30 @@ public class Consumer {
             }
         }
     }
+
+    private static void waitForKafkaBroker(String bootstrapServers) throws InterruptedException, ExecutionException {
+        Properties adminClientProps = new Properties();
+        adminClientProps.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+
+        try (AdminClient adminClient = AdminClient.create(adminClientProps)) {
+            int maxAttempts = 10;
+            int attempt = 1;
+            while (attempt <= maxAttempts) {
+                try {
+                    DescribeClusterResult describeClusterResult = adminClient.describeCluster();
+                    describeClusterResult.clusterId().get(); // This will throw an exception if the broker isn't available
+                    logger.info("Successfully connected to Kafka broker!");
+                    return; // Exit the loop if connection is successful
+                } catch (ExecutionException e) {
+                    logger.warn("Failed to connect to Kafka broker (attempt {}/{}), retrying in 5 seconds...", attempt, maxAttempts);
+                    Thread.sleep(5000);
+                    attempt++;
+                }
+            }
+            logger.error("Failed to connect to Kafka broker after {} attempts. Exiting.", maxAttempts);
+            System.exit(1); // Or throw an exception if you prefer
+        }
+    }
+
 }
 

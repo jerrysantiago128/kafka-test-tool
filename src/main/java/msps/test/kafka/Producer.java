@@ -5,12 +5,16 @@ package msps.test.kafka;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.DescribeClusterResult;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,7 +31,7 @@ public class Producer {
     //private static final String ApplicationName = "Producer";
     private static KafkaProducer<String, String> producer;
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException, ExecutionException{
 
         //validate test case 1 
         // check for proper system argument list
@@ -71,6 +75,8 @@ public class Producer {
             }
         }
 
+        // wait for Kafka Broker
+        waitForKafkaBroker(BOOTSTRAP_SERVERS);
         // create a single producer rather than one for each message
         KafkaProducer producer = construct_producer(BOOTSTRAP_SERVERS);
 
@@ -184,6 +190,30 @@ public class Producer {
             }
         }
         return message;
+    }
+
+    private static void waitForKafkaBroker(String bootstrapServers) throws InterruptedException, ExecutionException {
+        Properties adminClientProps = new Properties();
+        adminClientProps.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+
+        try (AdminClient adminClient = AdminClient.create(adminClientProps)) {
+            int maxAttempts = 10;
+            int attempt = 1;
+            while (attempt <= maxAttempts) {
+                try {
+                    DescribeClusterResult describeClusterResult = adminClient.describeCluster();
+                    describeClusterResult.clusterId().get(); // This will throw an exception if the broker isn't available
+                    logger.info("Successfully connected to Kafka broker!");
+                    return; // Exit the loop if connection is successful
+                } catch (ExecutionException e) {
+                    logger.warn("Failed to connect to Kafka broker (attempt {}/{}), retrying in 5 seconds...", attempt, maxAttempts);
+                    Thread.sleep(5000);
+                    attempt++;
+                }
+            }
+            logger.error("Failed to connect to Kafka broker after {} attempts. Exiting.", maxAttempts);
+            System.exit(1); // Or throw an exception if you prefer
+        }
     }
 
     private static void cleanup(){

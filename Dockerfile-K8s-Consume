@@ -1,0 +1,13 @@
+FROM registry1.dso.mil/ironbank/google/distroless/java-11:nonroot
+
+ARG BOOTSTRAP_SERVER=k8s-kafka
+ARG TOPIC_NAME=k8s
+ARG GROUP_ID=k8s-consumer
+
+EXPOSE 9092
+
+COPY target/kafka-test-tool-0.10.0.jar /app/
+
+WORKDIR /app
+
+CMD [ "kafka-test-tool-0.10.0.jar", "consumer", "k8s-kafka:9092", "k8s", "k8s-consumer"]
