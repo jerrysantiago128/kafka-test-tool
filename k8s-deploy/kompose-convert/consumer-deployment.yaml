@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f k8s-compose.yml
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: consumer
+  name: consumer
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      io.kompose.service: consumer
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f k8s-compose.yml
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        io.kompose.service: consumer
+    spec:
+      containers:
+        - image: k8s_consume:0.10.0
+          name: k8s-consumer
+      hostname: k8s_consumer
+      restartPolicy: Always
