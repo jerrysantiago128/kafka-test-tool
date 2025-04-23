@@ -75,6 +75,7 @@ public class Producer {
             }
         }
 
+        Thread.sleep(10000);
         // wait for Kafka Broker
         waitForKafkaBroker(BOOTSTRAP_SERVERS);
         // create a single producer rather than one for each message

@@ -40,6 +40,7 @@ public class Consumer {
         final String TOPIC_NAME = args[1];
         final String GROUP_ID = args[2];
 
+        Thread.sleep(10000);
         waitForKafkaBroker(BOOTSTRAP_SERVERS);
         consume(BOOTSTRAP_SERVERS, TOPIC_NAME, GROUP_ID);
 
