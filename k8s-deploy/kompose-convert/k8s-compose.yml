@@ -44,6 +44,8 @@ services:
     image: confluentinc/cp-kafka:latest
     depends_on:
       - kafka
+    ports:
+      - "9092:9092"
     environment:
       TOPIC_NAME: ${TOPIC_NAME:-k8s}
       BOOTSTRAP_SERVER: ${BOOTSTRAP_SERVER:-k8s-kafka:9092}
@@ -54,25 +56,29 @@ services:
         ipv4_address: 172.50.0.4
 
   producer:
-    container_name: k8s_produce
-    hostname: k8s_produce
+    container_name: k8s-produce
+    hostname: k8s-produce
     image: k8s_produce:0.10.0
     depends_on:
       kafka:
         condition: service_started
         restart: true 
+    ports:
+      - "9092:9092"
     networks:
       k8s_network:
         ipv4_address: 172.50.0.5
 
   consumer:
-    container_name: k8s_consumer
-    hostname: k8s_consumer
+    container_name: k8s-consumer
+    hostname: k8s-consumer
     image: k8s_consume:0.10.0
     depends_on:
       kafka:
         condition: service_started
         restart: true
+    ports:
+      - "9092:9092"
     networks:
       k8s_network:
         ipv4_address: 172.50.0.6

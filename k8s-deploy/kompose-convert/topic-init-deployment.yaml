@@ -33,5 +33,8 @@ spec:
               value: k8s
           image: confluentinc/cp-kafka:latest
           name: topic-init
+          ports:
+            - containerPort: 9092
+              protocol: TCP
       hostname: topic-init
       restartPolicy: Always

@@ -8,7 +8,7 @@ metadata:
     io.kompose.service: producer
   name: producer
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       io.kompose.service: producer
@@ -23,5 +23,8 @@ spec:
       containers:
         - image: k8s_produce:0.10.0
           name: k8s-produce
-      hostname: k8s_produce
+          ports:
+            - containerPort: 9092
+              protocol: TCP
+      hostname: k8s-produce
       restartPolicy: Always
