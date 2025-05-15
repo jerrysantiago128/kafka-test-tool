@@ -1,4 +1,4 @@
-package msps.test.kafka;
+package com.test.kafka;
 
 
 //imports

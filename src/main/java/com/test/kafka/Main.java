@@ -1,7 +1,7 @@
-package msps.test.kafka;
+package com.test.kafka;
 
-import msps.test.kafka.Producer;
-import msps.test.kafka.Consumer;
+import com.test.kafka.Producer;
+import com.test.kafka.Consumer;
 import java.util.Arrays;
 
 public class Main {
