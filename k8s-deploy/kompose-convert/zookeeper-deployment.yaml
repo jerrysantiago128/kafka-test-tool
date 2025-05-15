@@ -1,35 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert -f k8s-compose.yml
-    kompose.version: 1.35.0 (9532ceef3)
+  name: zookeeper-deployment
   labels:
-    io.kompose.service: zookeeper
-  name: zookeeper
+    app: zookeeper
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
-      io.kompose.service: zookeeper
+      app: zookeeper
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert -f k8s-compose.yml
-        kompose.version: 1.35.0 (9532ceef3)
       labels:
-        io.kompose.service: zookeeper
+        app: zookeeper
     spec:
       containers:
-        - env:
-            - name: ZOOKEEPER_CLIENT_PORT
-              value: "2181"
-            - name: ZOOKEEPER_TICK_TIME
-              value: "2000"
-          image: confluentinc/cp-zookeeper:latest
-          name: k8s-zookeeper
-          ports:
-            - containerPort: 2181
-              protocol: TCP
-      hostname: k8s-zookeeper
-      restartPolicy: Always
+      - name: zookeeper
+        image: registry1.dso.mil/ironbank/confluentinc/cp-zookeeper:7.8.2-1-ubi8
+        ports:
+        - containerPort: 2181
+        env:
+        - name: ZOOKEEPER_CLIENT_PORT
+          value: "2181"
+        - name: ZOOKEEPER_TICK_TIME
+          value: "2000"
